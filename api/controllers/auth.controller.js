@@ -1,0 +1,154 @@
+import User from "../models/user.model.js";
+import bcryptjs from "bcryptjs";
+import { errorHandler } from "../utils/error.js";
+import jwt from "jsonwebtoken";
+
+export const signup = async (req, res, next) => {
+  const { username, email, password } = req.body;
+
+  try {
+    // 1. Check if user already exists BEFORE inserting
+    const existingUser = await User.findOne({ $or: [{ email }, { username }] });
+    if (existingUser) {
+      return res.status(400).json({ 
+        success: false, 
+        message: "User already exists. Please login instead." 
+      });
+    }
+
+    const hashedPassword = bcryptjs.hashSync(password, 10);
+    const newUser = new User({ username, email, password: hashedPassword });
+
+    await newUser.save();
+    res.status(201).json({ success: true, message: "User created successfully" });
+  } catch (error) {
+    // 2. Detect duplicate key error (error code 11000) as a fallback
+    if (error.code === 11000) {
+      return res.status(400).json({ 
+        success: false, 
+        message: "User already exists. Please login instead." 
+      });
+    }
+    console.error("Error during signup:", error);
+    next(error);
+  }
+};
+
+export const signin = async (req, res, next) => {
+  const { email, password } = req.body;
+
+  try {
+    const validUser = await User.findOne({ email });
+    if (!validUser) return next(errorHandler(404, "User Not Found"));
+
+    const validPassword = bcryptjs.compareSync(password, validUser.password);
+    if (!validPassword)
+      return next(errorHandler(404, "Invalid User Credentials!"));
+
+    const token = jwt.sign({ id: validUser._id }, process.env.JWT_SECRET);
+    const { password: pass, ...rest } = validUser._doc;
+    res
+      .cookie("access_token", token, { httpOnly: true })
+      .status(200)
+      .json(rest);
+  } catch (error) {
+    next(error);
+  }
+};
+
+// OAUTH CONTROLLER FUNCTION
+export const google = async (req, res, next) => {
+  try {
+    const user = await User.findOne({ email: req.body.email });
+    if (user) {
+      const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
+      const { password: pass, ...rest } = user._doc;
+      res
+        .cookie("access_token", token, { httpOnly: true })
+        .status(200)
+        .json(rest);
+    } else {
+      const generatePassword =
+        Math.random().toString(36).slice(-8) +
+        Math.random().toString(36).slice(-8);
+      const hashedPassword = bcryptjs.hashSync(generatePassword, 10);
+      const newUser = User({
+        username:
+          req.body.name.split(" ").join("").toLowerCase() +
+          Math.random().toString(36).slice(-4),
+        email: req.body.email,
+        password: hashedPassword,
+        avatar: req.body.photo,
+      });
+
+      await newUser.save();
+      const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET);
+      const { password: pass, ...rest } = newUser._doc;
+      res
+        .cookie("access_token", token, { httpOnly: true })
+        .status(200)
+        .json(rest);
+    }
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const signout = async (req, res, next) => {
+  try {
+    res.clearCookie("access_token");
+    res.status(200).json({ message: "User signed out successfully" });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const forgotPassword = async (req, res, next) => {
+  const { email } = req.body;
+  try {
+    const user = await User.findOne({ email });
+    if (!user) return next(errorHandler(404, "User not found with this email"));
+
+    const resetToken = Math.random().toString(36).slice(-20) + Math.random().toString(36).slice(-20);
+    user.resetPasswordToken = resetToken;
+    user.resetPasswordExpire = Date.now() + 15 * 60 * 1000; // 15 minutes
+
+    await user.save();
+
+    const resetUrl = `${req.protocol}://${req.get('host')}/reset-password/${resetToken}`;
+
+    // Mocking email sending
+    console.log(`\n--- PASSWORD RESET EMAIL MOCK ---`);
+    console.log(`To: ${email}`);
+    console.log(`Link: ${resetUrl}`);
+    console.log(`---------------------------------\n`);
+
+    res.status(200).json({ success: true, message: "Email sent (Check console for mock link)" });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const resetPassword = async (req, res, next) => {
+  const { token } = req.params;
+  const { password } = req.body;
+
+  try {
+    const user = await User.findOne({
+      resetPasswordToken: token,
+      resetPasswordExpire: { $gt: Date.now() }
+    });
+
+    if (!user) return next(errorHandler(400, "Invalid or expired token"));
+
+    user.password = bcryptjs.hashSync(password, 10);
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpire = undefined;
+
+    await user.save();
+
+    res.status(200).json({ success: true, message: "Password reset successful" });
+  } catch (error) {
+    next(error);
+  }
+};
