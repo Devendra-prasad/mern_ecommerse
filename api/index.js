@@ -32,11 +32,17 @@ app.use("/api/user", userRouter);
 app.use("/api/auth", authRouter);
 app.use("/api/listing", listingRouter);
 
-
-app.use(express.static(path.join(__dirname, "/client/dist")));
-app.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname, "client", "dist", "index.html"));
+// check karne ke liye
+app.get("/", (req, resp) =>{
+  resp.send("API Running");
 });
+
+// frontend + backend same server per serve karte hai tab use hota hai ye 
+
+// app.use(express.static(path.join(__dirname, "/client/dist")));
+// app.get("*", (req, res) => {
+//   res.sendFile(path.join(__dirname, "client", "dist", "index.html"));
+// });
 
 import { ZodError } from "zod";
 
