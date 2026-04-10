@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: '/api',
+  baseURL: 'https://mern-ecommerse.onrender.com/api',
   withCredentials: true, // Ensures cookies (like JWT) are sent with requests
 });
 
