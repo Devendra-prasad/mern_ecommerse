@@ -26,7 +26,7 @@ const app = express();
 
 app.use(cors({
   origin:"https://mern-ecommerse-nine.vercel.app",
-  Credentials: true
+  credentials: true
 }));
 
 app.use(express.json());
