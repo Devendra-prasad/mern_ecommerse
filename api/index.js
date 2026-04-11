@@ -24,10 +24,28 @@ const __dirname = path.resolve();
 const app = express();
 
 
+const allowedOrigins = [
+  "http://localhost:5173",
+  "http://localhost:5174",
+  process.env.FRONTEND_URL,
+  "https://mern-ecommerse-nine.vercel.app"
+].filter(Boolean);
+
 app.use(cors({
-  origin:"https://mern-ecommerse-nine.vercel.app",
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
   credentials: true
 }));
+
+// app.use(cors({
+//   origin:"https://mern-ecommerse-nine.vercel.app",
+//   credentials: true
+// }));
 
 app.use(express.json());
 app.use(cookieParser());
