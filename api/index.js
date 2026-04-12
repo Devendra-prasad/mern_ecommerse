@@ -70,14 +70,22 @@ app.get("/", (req, resp) =>{
 // });
 
 import { ZodError } from "zod";
-
+// updated code ---------------------
 // ErrorHandler MiddleWare
 app.use((err, req, res, next) => {
   if (err instanceof ZodError) {
     const errors = {};
-    err.errors.forEach((e) => {
-      errors[e.path[0]] = e.message;
+    
+    // FIX: Safely check for issues or errors array
+    const validationErrors = err.issues || err.errors || [];
+    
+    validationErrors.forEach((e) => {
+      // Safe check for path
+      if (e.path && e.path.length > 0) {
+        errors[e.path[0]] = e.message;
+      }
     });
+
     return res.status(400).json({
       success: false,
       statusCode: 400,
