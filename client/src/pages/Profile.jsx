@@ -1,13 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
-  getDownloadURL,
-  getStorage,
-  ref,
-  uploadBytesResumable,
-} from "firebase/storage";
-import { app } from "../firebase";
-import {
   deleteUserSuccess,
   updateUserSuccess,
   signOutUserSuccess,
@@ -69,33 +62,49 @@ export default function Profile() {
     },
   });
 
-  const handleFileUpload = (file) => {
-    const storage = getStorage(app);
-    const fileName = new Date().getTime() + file.name;
-    const storageRef = ref(storage, fileName);
-    const uploadTask = uploadBytesResumable(storageRef, file);
+  const uploadToCloudinary = async (file) => {
+    return new Promise((resolve, reject) => {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('upload_preset', import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET);
 
-    uploadTask.on(
-      "state_changed",
-      (snapshot) => {
-        const progress = Math.round(
-          (snapshot.bytesTransferred / snapshot.totalBytes) * 100
-        );
-        setFilePerc(progress);
-      },
-      () => {
-        setFileUploadError(true);
-        setSuccessMessage("");
-      },
-      () => {
-        getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
-          setFormData({ ...formData, avatar: downloadURL });
-          setFileUploadError(false);
-          setSuccessMessage("Profile picture updated!");
-          setTimeout(() => setSuccessMessage(""), 5000);
+      setFileUploadError(false);
+      setFilePerc(10); // Initial progress
+
+      fetch(`https://api.cloudinary.com/v1_1/${import.meta.env.VITE_CLOUDINARY_CLOUD_NAME}/image/upload`, {
+        method: 'POST',
+        body: formData,
+      })
+        .then((res) => {
+          if (!res.ok) throw new Error('Failed to upload image to Cloudinary');
+          return res.json();
+        })
+        .then((data) => {
+          if (data.secure_url) {
+            setFilePerc(100);
+            resolve(data.secure_url);
+          } else {
+            reject(new Error(data.error?.message || 'Cloudinary response missing secure_url'));
+          }
+        })
+        .catch((err) => {
+          setFileUploadError(true);
+          reject(err);
         });
-      }
-    );
+    });
+  };
+
+  const handleFileUpload = async (file) => {
+    try {
+      const downloadURL = await uploadToCloudinary(file);
+      setFormData({ ...formData, avatar: downloadURL });
+      setFileUploadError(false);
+      setSuccessMessage("Profile picture uploaded!");
+      setTimeout(() => setSuccessMessage(""), 5000);
+    } catch (error) {
+      setFileUploadError(true);
+      setSuccessMessage("");
+    }
   };
 
   useEffect(() => {
