@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "https://mern-ecommerse.onrender.com/api/$1"
+    }
+  ]
+}
