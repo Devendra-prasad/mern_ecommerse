@@ -77,7 +77,8 @@ export const getListings = async (req, res, next) => {
     const city = req.query.city;
 
     const filter = {
-      name: { $regex: searchTerm, $options: 'i' }
+      name: { $regex: searchTerm, $options: 'i' },
+      isVerified: true // Only show verified listings in public search
     };
 
     let offer = req.query.offer;
@@ -124,7 +125,7 @@ export const getListings = async (req, res, next) => {
 
 export const getUpcomingListings = async (req, res, next) => {
   try {
-    const listings = await Listing.find({ isUpcoming: true })
+    const listings = await Listing.find({ isUpcoming: true, isVerified: true })
       .sort({ launchDate: 1 })
       .limit(5);
     res.status(200).json(listings);

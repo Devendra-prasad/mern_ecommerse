@@ -85,6 +85,10 @@ const listingSchema = new mongoose.Schema(
     hypeDescription: {
       type: String,
     },
+    isVerified: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true,

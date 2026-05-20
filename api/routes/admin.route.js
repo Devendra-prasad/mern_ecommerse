@@ -1,5 +1,5 @@
 import express from 'express';
-import { getMetrics, getUsers, deleteUser, getListings, deleteListing } from '../controllers/admin.controller.js';
+import { getMetrics, getUsers, deleteUser, getListings, deleteListing, approveListing } from '../controllers/admin.controller.js';
 import { verifyToken } from '../utils/verifyUser.js';
 import { verifyAdmin } from '../utils/verifyAdmin.js';
 
@@ -13,5 +13,6 @@ router.get('/users', getUsers);
 router.delete('/users/:id', deleteUser);
 router.get('/listings', getListings);
 router.delete('/listings/:id', deleteListing);
+router.patch('/listings/:id/approve', approveListing);
 
 export default router;

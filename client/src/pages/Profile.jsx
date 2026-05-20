@@ -279,7 +279,12 @@ export default function Profile() {
                           <Link to={`/listing/${listing._id}`}>
                             <p className="font-bold text-slate-800 hover:text-purple-600 transition-colors line-clamp-1">{listing.name}</p>
                           </Link>
-                          <p className="text-xs font-bold text-gold-accent mt-0.5 uppercase tracking-widest">₹{listing.regularPrice.toLocaleString('en-IN')}</p>
+                          <div className="flex items-center gap-2 mt-0.5">
+                            <p className="text-xs font-bold text-gold-accent uppercase tracking-widest">₹{listing.regularPrice.toLocaleString('en-IN')}</p>
+                            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider ${listing.isVerified ? 'bg-green-100 text-green-700' : 'bg-orange-100 text-orange-700'}`}>
+                              {listing.isVerified ? 'Live' : 'Pending'}
+                            </span>
+                          </div>
                         </div>
                       </div>
 
