@@ -20,6 +20,11 @@ const userSchema = new mongoose.Schema({
     type: String,
     default: 'https://t4.ftcdn.net/jpg/05/09/59/75/240_F_509597532_RKUuYsERhODmkxkZd82pSHnFtDAtgbzJ.jpg'
   },
+  role: {
+    type: String,
+    enum: ['user', 'admin'],
+    default: 'user'
+  },
   resetPasswordToken: String,
   resetPasswordExpire: Date,
   favorites: [{

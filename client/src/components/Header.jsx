@@ -67,6 +67,14 @@ export default function Header() {
               </li>
             </Link>
 
+            {currentUser && currentUser.role === 'admin' && (
+              <Link to="/admin-dashboard" className="hidden md:block">
+                <li className="text-rose-600 font-bold hover:text-rose-800 transition-colors bg-rose-100 px-3 py-1 rounded-full border border-rose-200 flex items-center gap-1 shadow-sm">
+                  Admin Panel
+                </li>
+              </Link>
+            )}
+
             <Link to="/profile" className="flex items-center">
               {currentUser ? (
                 <div className="flex items-center gap-2 bg-white/40 p-1 pr-3 rounded-full hover:bg-white/60 transition-all border border-black/5">

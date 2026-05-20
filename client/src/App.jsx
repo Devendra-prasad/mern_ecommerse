@@ -14,6 +14,10 @@ import Search from "./pages/Search";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import Favorites from "./pages/Favorites";
+import AdminRoute from "./components/AdminRoute";
+import AdminDashboard from "./pages/AdminDashboard";
+import ManageUsers from "./pages/ManageUsers";
+import ManageListings from "./pages/ManageListings";
 
 export default function App() {
   return (
@@ -33,6 +37,11 @@ export default function App() {
           <Route path="/profile" element={<Profile />} />
           <Route path="/create-listing" element={<CreateListing />} />
           <Route path="/update-listing/:listingId" element={<UpdateListing />} />
+        </Route>
+        <Route element={<AdminRoute />}>
+          <Route path="/admin-dashboard" element={<AdminDashboard />} />
+          <Route path="/admin-users" element={<ManageUsers />} />
+          <Route path="/admin-listings" element={<ManageListings />} />
         </Route>
       </Routes>
       <Footer />
