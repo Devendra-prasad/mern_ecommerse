@@ -151,6 +151,11 @@ export default function Listing() {
             <div className="lg:col-span-2 space-y-10">
               <div className="space-y-4">
                 <div className="flex flex-wrap items-center gap-4">
+                  {listing.status !== 'active' && (
+                    <span className="px-4 py-1.5 bg-red-600 text-white rounded-full text-xs font-black uppercase tracking-widest shadow-lg shadow-red-500/20 animate-pulse">
+                      {listing.status === 'sold' ? "SOLD OUT" : "RENTED OUT"}
+                    </span>
+                  )}
                   <span className="px-4 py-1.5 bg-purple-600 text-white rounded-full text-xs font-black uppercase tracking-widest shadow-lg shadow-purple-500/20">
                     {listing.type === "rent" ? "For Rent" : "For Sale"}
                   </span>
@@ -218,7 +223,14 @@ export default function Listing() {
                   </div>
 
                   <div className="pt-6 border-t border-black/5">
-                    {listing.isUpcoming ? (
+                    {listing.status !== 'active' ? (
+                      <div className="bg-red-50 p-6 rounded-[2rem] border border-red-100 text-center">
+                        <p className="text-xl font-black text-red-600 uppercase tracking-widest">
+                           {listing.status === 'sold' ? "SOLD OUT" : "RENTED OUT"}
+                        </p>
+                        <p className="text-xs text-red-400 font-bold mt-2">This property is no longer available.</p>
+                      </div>
+                    ) : listing.isUpcoming ? (
                       <div className="space-y-6">
                         <div className="bg-red-50 p-6 rounded-[2rem] border border-red-100 text-center animate-pulse">
                           <p className="text-[10px] font-black text-red-500 uppercase tracking-widest mb-2">Launching In</p>

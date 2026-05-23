@@ -41,7 +41,14 @@ export default function UpdateListing() {
       if (data.launchDate) {
         data.launchDate = new Date(data.launchDate).toISOString().split('T')[0];
       }
-      setFormData(data);
+      
+      // Sanitize any null values from DB to empty string to prevent Zod string validation errors
+      const sanitizedData = {};
+      for (const key in data) {
+        sanitizedData[key] = data[key] === null ? "" : data[key];
+      }
+      
+      setFormData((prev) => ({ ...prev, ...sanitizedData }));
     };
     fetchListing();
   }, [params.listingId]);

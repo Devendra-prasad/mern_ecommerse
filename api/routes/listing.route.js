@@ -9,6 +9,7 @@ const router = express.Router();
 router.post('/create', verifyToken, validate(listingSchema), createListing)
 router.delete('/delete/:id', verifyToken, deleteListing)
 router.put('/update/:id', verifyToken, validate(listingSchema), updateListing)
+router.patch('/updateStatus/:id', verifyToken, updateListing)
 router.get('/getUpcoming', getUpcomingListings)
 router.get('/get/:id', getListing)
 router.get('/get', getListings)

@@ -58,7 +58,14 @@ export default function ListingItem({ listing }) {
             onError={(e) => { e.target.onerror = null; e.target.src = defaultImg; }}
             className="h-full w-full object-cover group-hover:scale-110 transition-transform duration-700"
           />
-          {listing.offer && (
+          {listing.status !== 'active' && (
+            <div className="absolute inset-0 bg-black/40 flex items-center justify-center z-10 backdrop-blur-[2px]">
+              <div className="bg-red-600/90 text-white px-6 py-2 rounded-xl text-xl font-black uppercase tracking-widest rotate-[-15deg] border-2 border-red-400 shadow-2xl">
+                {listing.status === 'sold' ? 'SOLD' : 'RENTED'}
+              </div>
+            </div>
+          )}
+          {listing.offer && listing.status === 'active' && (
             <div className="absolute top-4 left-4 bg-gradient-to-r from-red-600 to-orange-600 text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg flex items-center gap-1 animate-fade-in shadow-red-200">
               <FaTag className="text-[10px]" /> SAVE BIG
             </div>

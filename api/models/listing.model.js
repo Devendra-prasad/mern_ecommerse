@@ -89,6 +89,11 @@ const listingSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    status: {
+      type: String,
+      enum: ['active', 'sold', 'rented'],
+      default: 'active',
+    },
   },
   {
     timestamps: true,

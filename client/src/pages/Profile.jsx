@@ -7,7 +7,7 @@ import {
 } from "../redux/user/userSlice";
 import { Link } from "react-router-dom";
 import GlassCard from "../components/GlassCard";
-import { FaCamera, FaSignOutAlt, FaTrash, FaList, FaHeart, FaPlusCircle, FaEdit } from "react-icons/fa";
+import { FaCamera, FaSignOutAlt, FaTrash, FaList, FaHeart, FaPlusCircle, FaEdit, FaCheckCircle } from "react-icons/fa";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "../utils/api";
 
@@ -60,6 +60,18 @@ export default function Profile() {
       setTimeout(() => setSuccessMessage(""), 5000);
       queryClient.invalidateQueries({ queryKey: ['userListings', currentUser._id] });
     },
+  });
+
+  const updateListingStatusMutation = useMutation({
+    mutationFn: ({id, data}) => api.patch(`/listing/updateStatus/${id}`, data),
+    onSuccess: () => {
+      setSuccessMessage("Listing status updated!");
+      setTimeout(() => setSuccessMessage(""), 5000);
+      queryClient.invalidateQueries({ queryKey: ['userListings', currentUser._id] });
+    },
+    onError: (err) => {
+      alert(`Error updating status: ${err.message}`);
+    }
   });
 
   const uploadToCloudinary = async (file) => {
@@ -132,6 +144,12 @@ export default function Profile() {
   const handleListingDelete = (listingId) => {
     if (!window.confirm("Delete this listing?")) return;
     deleteListingMutation.mutate(listingId);
+  };
+
+  const handleListingStatusUpdate = (listing) => {
+    const newStatus = listing.type === 'rent' ? 'rented' : 'sold';
+    if (!window.confirm(`Are you sure you want to mark this property as ${newStatus.toUpperCase()}?`)) return;
+    updateListingStatusMutation.mutate({ id: listing._id, data: { status: newStatus } });
   };
 
   return (
@@ -284,11 +302,25 @@ export default function Profile() {
                             <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider ${listing.isVerified ? 'bg-green-100 text-green-700' : 'bg-orange-100 text-orange-700'}`}>
                               {listing.isVerified ? 'Live' : 'Pending'}
                             </span>
+                            {listing.status !== 'active' && (
+                              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider bg-red-100 text-red-700 ml-1">
+                                {listing.status}
+                              </span>
+                            )}
                           </div>
                         </div>
                       </div>
 
                       <div className="flex gap-2">
+                        {listing.status === 'active' && (
+                          <button 
+                            onClick={() => handleListingStatusUpdate(listing)} 
+                            title={listing.type === 'rent' ? 'Mark as Rented' : 'Mark as Sold'}
+                            className="p-3 bg-green-50 text-green-600 rounded-xl hover:bg-green-100 transition-colors"
+                          >
+                            <FaCheckCircle />
+                          </button>
+                        )}
                         <Link to={`/update-listing/${listing._id}`} className="p-3 bg-blue-50 text-blue-600 rounded-xl hover:bg-blue-100 transition-colors">
                           <FaEdit />
                         </Link>
